@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "758157225660",
+    "firebase_url": "https://sailingassistant-c1f9c.firebaseio.com",
+    "project_id": "sailingassistant-c1f9c",
+    "storage_bucket": "sailingassistant-c1f9c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758157225660:android:ccb6e982ddcac06c",
+        "android_client_info": {
+          "package_name": "com.example.maciej.sailingassistant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "758157225660-7i65g4l12aa8u7l1lbqjt6u57a9erenf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXpcLVs1lDs6zBb4jvbgsBf_9GAHzwXHw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "758157225660-7i65g4l12aa8u7l1lbqjt6u57a9erenf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
