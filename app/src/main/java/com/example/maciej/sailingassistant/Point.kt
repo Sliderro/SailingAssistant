@@ -3,40 +3,46 @@ package com.example.maciej.sailingassistant
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.google.firebase.database.IgnoreExtraProperties
 
+@IgnoreExtraProperties
+data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0,
+                 val windDirecion: Double = 0.0, val windSpeed: Double = 0.0) : Parcelable {
+    var datetime: Datetime? = Datetime(0, 0, 0, 0, 0, 0, 0)
+    val tensometers: List<Double> = ArrayList(6)
+    val inclinations: List<Double> = ArrayList(2)
+    val accelerometer: Map<String, Double> = HashMap()
 
-data class Point(val datetime: Datetime , val longitude: Double, val latitude: Double, val accelerometer: Accelerometer,
-                 val windDirecion: Double,val windSpeed: Double) : Parcelable {
+    constructor(datetime: Datetime, longitude: Double, latitude: Double, windDirecion: Double, windSpeed: Double,
+                tensometers: DoubleArray, inclinations: DoubleArray, accelerometer: Map<String, Double>) : this(longitude, latitude, windDirecion, windSpeed) {
 
-    val tensometers: DoubleArray = DoubleArray(6)
-    val inclinations: DoubleArray = DoubleArray(2)
-
-    constructor( datetime: Datetime ,  longitude: Double,  latitude: Double,  accelerometer: Accelerometer,
-                 windDirecion: Double, windSpeed: Double, tensometers: DoubleArray, inclinations: DoubleArray) : this(
-            datetime, longitude, latitude, accelerometer, windDirecion, windSpeed) {
-        System.arraycopy(tensometers,0,this.tensometers,0,tensometers.size)
-        System.arraycopy(inclinations,0,this.inclinations,0,inclinations.size)
+        this.datetime = datetime
+        System.arraycopy(tensometers, 0, this.tensometers, 0, tensometers.size)
+        System.arraycopy(inclinations, 0, this.inclinations, 0, inclinations.size)
     }
+
     constructor(parcel: Parcel) : this(
-            parcel.readParcelable(Datetime::class.java.classLoader),
+            //parcel.readParcelable(Datetime::class.java.classLoader),
             parcel.readDouble(),
             parcel.readDouble(),
-            parcel.readParcelable(Accelerometer::class.java.classLoader),
             parcel.readDouble(),
             parcel.readDouble()) {
-        parcel.readDoubleArray(tensometers)
-        parcel.readDoubleArray(inclinations)
+        datetime = parcel.readParcelable(Datetime::class.java.classLoader)
+        parcel.readList(tensometers, Double::class.java.classLoader)
+        parcel.readList(inclinations, Double::class.java.classLoader)
+        parcel.readMap(accelerometer, Double::class.java.classLoader)
     }
 
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeParcelable(datetime, flags)
         parcel.writeDouble(longitude)
         parcel.writeDouble(latitude)
-        parcel.writeParcelable(accelerometer, flags)
         parcel.writeDouble(windDirecion)
         parcel.writeDouble(windSpeed)
-        parcel.writeDoubleArray(tensometers)
-        parcel.writeDoubleArray(inclinations)
+        parcel.writeParcelable(datetime, flags)
+        parcel.writeList(tensometers)
+        parcel.writeList(inclinations)
+        parcel.writeMap(accelerometer)
     }
 
     override fun describeContents(): Int {
