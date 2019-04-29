@@ -1,5 +1,6 @@
 package com.example.maciej.sailingassistant
 
+import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -66,5 +67,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     override fun onLowMemory() {
         super.onLowMemory()
         mapView.onLowMemory()
+    }
+
+    fun launchDetailActivity(points : ArrayList<Point>) {
+        val detailIntent = Intent(this,DetailActivity::class.java)
+        detailIntent.putParcelableArrayListExtra("points",points)
+        startActivity(detailIntent)
     }
 }
