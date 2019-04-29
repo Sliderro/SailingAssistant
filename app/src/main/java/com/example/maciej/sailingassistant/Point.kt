@@ -5,6 +5,9 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.google.firebase.database.IgnoreExtraProperties
 
+/**
+ * Klasa modelująca odczyty w danym punkcie czasu
+ */
 @IgnoreExtraProperties
 data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0,
                  val windDirecion: Double = 0.0, val windSpeed: Double = 0.0) : Parcelable {

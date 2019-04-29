@@ -23,4 +23,12 @@ class DatetimeTest {
         val datetimeFromString = Datetime.fromString(string)
         assertEquals(0,datetime.compareTo(datetimeFromString))
     }
+    @Test
+    fun testToFormattedString() {
+        val datetime = Datetime(2000,12,1,13,21,30,541)
+        val string = "2000-12-01T13:21:30:541Z"
+        val datetimeString = datetime.toFormattedString()
+
+        assertTrue(datetimeString.contentEquals(string))
+    }
 }
