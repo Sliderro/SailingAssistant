@@ -11,6 +11,9 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlin.math.max
+import kotlin.math.min
+
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
@@ -19,10 +22,31 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     private val firebaseDatabaseManager = FirebaseDatabaseManager()
     var startDatetime: Datetime = Datetime.fromString("2019-05-02T20:27:19:154Z")
     var endDatetime: Datetime = Datetime.fromString("2019-05-02T20:27:27:215Z")
+    var pointList = ArrayList<Point?>()
+
+    val earthRadius = 6371000f
 
 
+    /**
+     * Przeszukuje listę punktów w poszukiwaniu najbliższego kliknięciu.
+     * Następnie uruchami aktywność z podglądem detali i przekazuje jej najbliższych (20) sąsiadów wybranego punktu
+     */
     override fun onMapClick(p0: LatLng?) {
-        println(p0)
+        if (p0== null) {
+            return
+        }
+        val i = findClosestPointIndex(p0.latitude,p0.longitude)
+        if(i == null) {
+            Log.d("sailor","no points")
+            return
+        }
+        Log.d("sailor","(${pointList[i]!!.latitude},${pointList[i]!!.longitude})")
+
+        val neighbourPoints = ArrayList<Point>(21)
+        for(j in max(0,i-10)..min(pointList.lastIndex,i+10)) {
+            neighbourPoints.add(pointList[j]!!)
+        }
+        launchDetailActivity(neighbourPoints)
     }
 
     override fun onMapReady(map: GoogleMap?) {
@@ -35,12 +59,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
 
         firebaseDatabaseManager.fetchPoints(startDatetime, endDatetime, object : FirebaseCallback {
             override fun onCallback(points: ArrayList<Point?>) {
+                pointList=points
                 Log.d("TAG", points.toString())
                 println("test 1 = ${points[3]}")
                 println("test 2 = ${points[3]!!.latitude}")
 
-                var startLatitude = points[0]!!.latitude
-                var startLongitude = points[0]!!.longitude
+                val startLatitude = points[0]!!.latitude
+                val startLongitude = points[0]!!.longitude
 //                var endLatitude = points[1]!!.latitude - 15
 //                var endLongitude = points[1]!!.longitude - 11
 
@@ -53,10 +78,49 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
                 }
             }
         })
-
-
-
     }
+
+    /**
+     * Zwraca pozycję na liście punktu najbliższego danym koordynatom
+     * Zwraca null gdy lista punktów jest pusta
+     */
+    fun findClosestPointIndex(targetLatitude: Double, targetLongitude: Double): Int? {
+        if(pointList.isEmpty()) {
+            return null
+        }
+        var closestPointIndex = 0
+        var minDistance = distance(targetLatitude,targetLongitude,pointList[0]!!.latitude,pointList[0]!!.longitude)
+        for((i,point) in pointList.withIndex()) {
+            val dist = distance(targetLatitude,targetLongitude,point!!.latitude,point.longitude)
+            if(dist < minDistance) {
+                closestPointIndex=i
+                minDistance = dist
+            }
+        }
+        return closestPointIndex
+    }
+
+    /**
+     * Zwraca odległość między punktami (latitude1,longitude1)  (latitude2,longitude2) na kuli ziemskiej
+     */
+    private fun distance(latitude1: Double, longitude1:Double,latitude2: Double, longitude2:Double): Double {
+        val lat1 = latitude1.toRadian()
+        val lat2 = latitude2.toRadian()
+        val dlat = (lat2-lat1)
+        val dlong =(longitude2-longitude1).toRadian()
+
+        val a = Math.sin(dlat/2) * Math.sin(dlat/2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dlong/2) * Math.sin(dlong/2)
+        return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    }
+
+
+    /**
+     * Zamiana stopni na radiany
+     */
+    private fun Double.toRadian():Double {
+        return this*Math.PI/180f
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,6 +162,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     }
 
 
+    /**
+     * Uruchamia aktywność z podglądem szczegółów i przekuzje jej listę punktów
+     */
     fun launchDetailActivity(points: ArrayList<Point>) {
         val detailIntent = Intent(this, DetailActivity::class.java)
         detailIntent.putParcelableArrayListExtra("points", points)
