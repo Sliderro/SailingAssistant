@@ -12,8 +12,13 @@ import com.google.firebase.database.ValueEventListener
  * Zarządza onlinową bazą danych firebase
  */
 class FirebaseDatabaseManager {
-    private val db: DatabaseReference = FirebaseDatabase.getInstance().reference
+    private val db: DatabaseReference
     var points = ArrayList<Point?>()
+
+    init {
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        db = FirebaseDatabase.getInstance().reference
+    }
 
     fun fetchPoints(startDatetime: Datetime, endDatetime: Datetime, firebaseCallback: FirebaseCallback) {
         val query = db.child("boats").child("twR0OqZbv3b875Y8NSnjR39leZi2").orderByKey().startAt(startDatetime.toFormattedString()).endAt(endDatetime.toFormattedString())
@@ -23,6 +28,7 @@ class FirebaseDatabaseManager {
             }
 
             override fun onDataChange(p0: DataSnapshot) {
+                points.clear()
                 var currentPoint: Point?
                 for (a in p0.children) {
                     Log.d("myDB", a.key)

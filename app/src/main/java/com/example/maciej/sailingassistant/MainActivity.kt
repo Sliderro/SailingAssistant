@@ -1,16 +1,22 @@
 package com.example.maciej.sailingassistant
 
+import android.annotation.TargetApi
+import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.max
 import kotlin.math.min
 
@@ -20,13 +26,25 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     lateinit var map: GoogleMap
     private lateinit var mapView: MapView
     private val firebaseDatabaseManager = FirebaseDatabaseManager()
-    var startDatetime: Datetime = Datetime.fromString("2019-05-02T20:27:19:154Z")
-    var endDatetime: Datetime = Datetime.fromString("2019-05-02T20:27:27:215Z")
+    var startDatetime: Datetime = Datetime(0,0,0,0,0,0,0)
+    var endDatetime: Datetime = Datetime(0,0,0,0,0,0,0)
     var pointList = ArrayList<Point?>()
+    private val firebaseCallback = object: FirebaseCallback {
+        override fun onCallback(points: ArrayList<Point?>) {
+            pointList=points
+            map.clear()
+            if(!pointList.isEmpty()) {
+                val startLatitude = points[0]?.latitude
+                val startLongitude = points[0]?.longitude
+                val startPosition =  LatLng(startLatitude ?: 0.0, startLongitude ?: 0.0)
+                map.moveCamera(CameraUpdateFactory.newLatLng(startPosition))
+                for (i in 0..points.size-2 ){   //robocze rysowanie trasy
+                    map.addPolyline(PolylineOptions().add(LatLng(points[i]!!.latitude, points[i]!!.longitude), LatLng(points[i+1]!!.latitude, points[i+1]!!.longitude)).width(5.0f).color(Color.BLUE))
+                }
+            }
 
-    val earthRadius = 6371000f
-
-
+        }
+    }
     /**
      * Przeszukuje listę punktów w poszukiwaniu najbliższego kliknięciu.
      * Następnie uruchami aktywność z podglądem detali i przekazuje jej najbliższych (20) sąsiadów wybranego punktu
@@ -51,33 +69,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
 
     override fun onMapReady(map: GoogleMap?) {
         if (map != null) this.map = map
-        map?.setMinZoomPreference(1.0f)
-        val ny = LatLng(40.7143528, -74.0059731)
-        map?.moveCamera(CameraUpdateFactory.newLatLng(ny))
-        map?.addPolyline(PolylineOptions().add(ny, LatLng(40.7243528, -74.0159731)).width(5.0f).color(Color.RED))
+        map?.setMinZoomPreference(12.0f)
         map?.setOnMapClickListener(this)
-
-        firebaseDatabaseManager.fetchPoints(startDatetime, endDatetime, object : FirebaseCallback {
-            override fun onCallback(points: ArrayList<Point?>) {
-                pointList=points
-                Log.d("TAG", points.toString())
-                println("test 1 = ${points[3]}")
-                println("test 2 = ${points[3]!!.latitude}")
-
-                val startLatitude = points[0]!!.latitude
-                val startLongitude = points[0]!!.longitude
-//                var endLatitude = points[1]!!.latitude - 15
-//                var endLongitude = points[1]!!.longitude - 11
-
-                val ny2 = LatLng(startLatitude, startLongitude)
-                map?.moveCamera(CameraUpdateFactory.newLatLng(ny2))
-//                map?.addPolyline(PolylineOptions().add(ny2, LatLng(endLatitude, endLongitude)).width(5.0f).color(Color.BLUE))
-
-                for (i in 0..points.size-2 ){   //robocze rysowanie trasy
-                    map?.addPolyline(PolylineOptions().add(LatLng(points[i]!!.latitude, points[i]!!.longitude), LatLng(points[i+1]!!.latitude, points[i+1]!!.longitude)).width(5.0f).color(Color.BLUE))
-                }
-            }
-        })
+        firebaseDatabaseManager.fetchPoints(startDatetime, endDatetime,firebaseCallback)
     }
 
     /**
@@ -103,6 +97,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     /**
      * Zwraca odległość między punktami (latitude1,longitude1)  (latitude2,longitude2) na kuli ziemskiej
      */
+    private val earthRadius = 6371000f
     private fun distance(latitude1: Double, longitude1:Double,latitude2: Double, longitude2:Double): Double {
         val lat1 = latitude1.toRadian()
         val lat2 = latitude2.toRadian()
@@ -113,7 +108,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
     }
 
-
     /**
      * Zamiana stopni na radiany
      */
@@ -121,14 +115,22 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         return this*Math.PI/180f
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //Odczytaj jaki przedział czasu był potrzebny ostatnio
+        val preferences = getPreferences(Context.MODE_PRIVATE)
+        with(preferences) {
+            startDatetime = Datetime.fromString(getString("START_DATETIME",Datetime.zeroDatetimeString)!!)
+            endDatetime = Datetime.fromString(getString("END_DATETIME",Datetime.zeroDatetimeString)!!)
+        }
+
         mapView = findViewById(R.id.map_view)
         mapView.onCreate(null)
         mapView.getMapAsync(this)
+
+
     }
 
     override fun onResume() {
@@ -142,6 +144,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     }
 
     override fun onStop() {
+        //Zapisz wybrany przedział czasu do preferencji
+        val preferences = getPreferences(Context.MODE_PRIVATE)
+        with(preferences.edit()) {
+            putString("START_DATETIME",startDatetime.toFormattedString())
+            putString("END_DATETIME",endDatetime.toFormattedString())
+            apply()
+        }
         super.onStop()
         mapView.onStop()
     }
@@ -169,5 +178,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         val detailIntent = Intent(this, DetailActivity::class.java)
         detailIntent.putParcelableArrayListExtra("points", points)
         startActivity(detailIntent)
+    }
+
+    /**
+     * Wyświetla dialog z wyborem daty i pobiera dane z wybranego przez użytkownika dnia
+     */
+    fun showDatePickerDialog(view: View) {
+        val calendar = Calendar.getInstance()
+        val dateDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener {_ , year, month, dayOfMonth ->
+            startDatetime= Datetime(year,month+1,dayOfMonth,0,0,0,0)
+            endDatetime = Datetime(year,month+1,dayOfMonth,23,59,59,999)
+            firebaseDatabaseManager.fetchPoints(startDatetime,endDatetime,firebaseCallback)
+
+        },calendar.get(Calendar.YEAR),calendar.get(Calendar.MONTH),calendar.get(Calendar.DAY_OF_MONTH))
+        dateDialog.show()
     }
 }
