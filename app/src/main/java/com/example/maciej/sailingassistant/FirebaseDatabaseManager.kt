@@ -11,7 +11,7 @@ import com.google.firebase.database.ValueEventListener
 /**
  * Zarządza onlinową bazą danych firebase
  */
-class FirebaseDatabaseManager {
+object FirebaseDatabaseManager {
     private val db: DatabaseReference
     var points = ArrayList<Point?>()
 

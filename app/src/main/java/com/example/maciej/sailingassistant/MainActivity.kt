@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
 
     lateinit var map: GoogleMap
     private lateinit var mapView: MapView
-    private val firebaseDatabaseManager = FirebaseDatabaseManager()
+    private val firebaseDatabaseManager = FirebaseDatabaseManager
     var startDatetime: Datetime = Datetime(0,0,0,0,0,0,0)
     var endDatetime: Datetime = Datetime(0,0,0,0,0,0,0)
     var pointList = ArrayList<Point?>()
