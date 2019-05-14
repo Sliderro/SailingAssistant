@@ -33,6 +33,7 @@ data class Datetime(val year:Int, val month:Int, val day:Int, val hour:Int, val 
     }
 
     companion object CREATOR : Parcelable.Creator<Datetime> {
+        const val zeroDatetimeString = "0000-00-00T00:00:00:000Z"
         override fun createFromParcel(parcel: Parcel): Datetime {
             return Datetime(parcel)
         }
@@ -93,7 +94,6 @@ data class Datetime(val year:Int, val month:Int, val day:Int, val hour:Int, val 
      */
     private fun addZeroPadding(desiredLength: Int, string: String): String {
         var res = string
-        val a = ""
         while(res.length<desiredLength) {
             res = "0$res"
         }
