@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
@@ -16,14 +17,14 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.max
 import kotlin.math.min
 
-
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapClickListener {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnCameraMoveListener {
 
     lateinit var map: GoogleMap
     private lateinit var mapView: MapView
@@ -32,19 +33,38 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     var endDatetime: Datetime = Datetime(0, 0, 0, 0, 0, 0, 0)
     var pointList = ArrayList<Point?>()
     val numberOfNeighbors = 300
+
+    /**
+     * Czyści mapę, i rysuje ścieżkę korzystając z pointList.
+     * W przypadku dużego oddalenia, rysuje tylko optymalną liczbę punktów.
+     * Rysuje tylko punkty widoczne na ekranie.
+     *
+     */
+    private fun drawPath( snapToStart: Boolean = false ) {
+        val maxPointsAtScreen = 100
+        var points = ArrayList<Point?>()
+        if( snapToStart && !pointList.isEmpty() ) {
+            map.moveCamera( CameraUpdateFactory.zoomBy( 8.0f ) )
+            map.moveCamera( CameraUpdateFactory.newLatLng( LatLng( pointList[0]!!.latitude, pointList[0]!!.longitude ) ) )
+            points = pointList
+        }
+        else {
+            points.addAll( pointList.filter { p -> bounds!!.contains( p?.let { LatLng( p.latitude, p.longitude ) } ) } )
+        }
+        println( "Drawing " + points.size + " points..." )
+        map.clear()
+        if( !points.isEmpty() ) {
+            val s = Math.max( points.size/maxPointsAtScreen, 1 ) // step
+            for( i in (0..(points.size-s-1)).step( s ) ) {
+                map.addPolyline( PolylineOptions().add( LatLng( points[i]!!.latitude, points[i]!!.longitude ), LatLng( points[i+s]!!.latitude, points[i+s]!!.longitude ) ).width( 5.0f ).color( Color.BLUE ) )
+            }
+        }
+    }
+
     private val firebaseCallback = object : FirebaseCallback {
         override fun onCallback(points: ArrayList<Point?>) {
             pointList = points
-            map.clear()
-            if (!pointList.isEmpty()) {
-                val startLatitude = points[0]?.latitude
-                val startLongitude = points[0]?.longitude
-                val startPosition = LatLng(startLatitude ?: 0.0, startLongitude ?: 0.0)
-                map.moveCamera(CameraUpdateFactory.newLatLng(startPosition))
-                for (i in 0..points.size - 2) {   //robocze rysowanie trasy
-                    map.addPolyline(PolylineOptions().add(LatLng(points[i]!!.latitude, points[i]!!.longitude), LatLng(points[i + 1]!!.latitude, points[i + 1]!!.longitude)).width(5.0f).color(Color.BLUE))
-                }
-            }
+            drawPath( true )
         }
     }
 
@@ -73,8 +93,72 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     override fun onMapReady(map: GoogleMap?) {
         if (map != null) this.map = map
         map?.setMinZoomPreference(16.0f)
-        map?.setOnMapClickListener(this)
+        map?.setOnMapClickListener( this )
+        map?.setOnCameraMoveListener( this )
+        map?.moveCamera( CameraUpdateFactory.newLatLng( LatLng(51.107883, 17.038538) ) ) // Domyślnie Wrocław
         firebaseDatabaseManager.fetchPoints(startDatetime, endDatetime, firebaseCallback)
+    }
+
+    private var bounds: LatLngBounds? = null
+    private var margin = 0.01f
+    private var lastCameraZoom = 0.0f
+    private var lastCameraCenter = LatLng( 0.0, 0.0 )
+
+    /**
+     * Przygotowuje dane w tle i rysuje już gotowe
+     */
+    inner class AsyncDraw: AsyncTask<Void, Void, Void>() {
+
+        private val maxPointsAtScreen = 50 // 100 też działa płynnie, ale z wyraźnym spadkiem prędkości. Powyżej jest już problem (przynajmniej na moim telefonie).
+        var lines = ArrayList<Pair<LatLng,LatLng>>()
+
+        override fun doInBackground(vararg params: Void?): Void? {
+            for( i in (0..(pointList.size-2)) ) {
+                if( bounds!!.contains( LatLng( pointList[i]!!.latitude, pointList[i]!!.longitude ) ) || bounds!!.contains( LatLng( pointList[i+1]!!.latitude, pointList[i+1]!!.longitude ) ) ) {
+                    lines.add( Pair( LatLng( pointList[i]!!.latitude, pointList[i]!!.longitude ), LatLng( pointList[i+1]!!.latitude, pointList[i+1]!!.longitude ) ) )
+                }
+            }
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+            val s = Math.max( lines.size/maxPointsAtScreen, 1 ) // step
+            println("Drawing " + (lines.size/s) + " lines...")
+            map.clear()
+            if (!lines.isEmpty()) {
+                for (i in (0..(lines.size-s-1)).step( s ) ) {
+                    map.addPolyline(PolylineOptions().add(lines[i].first, lines[i+s-1].second).width(5.0f).color(Color.BLUE))
+                }
+            }
+        }
+    }
+
+    var lastUpdateTime = System.currentTimeMillis()
+
+    override fun onCameraMove() {
+        val minZoomChange = 0.3f // 1.0f to zmiana 2x
+
+        if( System.currentTimeMillis() - lastUpdateTime < 100 && (lastCameraZoom-minZoomChange).rangeTo( lastCameraZoom+minZoomChange ).contains( map.cameraPosition.zoom ) ) return
+        lastUpdateTime = System.currentTimeMillis()
+
+        bounds = map.projection.visibleRegion.latLngBounds
+        margin = Math.pow( 0.03, (map.cameraPosition.zoom - 16.0f).toDouble() ).toFloat()
+        bounds = bounds!!.including( LatLng( bounds!!.northeast.latitude + margin, bounds!!.northeast.longitude + margin*2 ) )
+        bounds = bounds!!.including( LatLng( bounds!!.southwest.latitude - margin, bounds!!.southwest.longitude - margin*2 ) )
+
+        if( lastCameraZoom == 0.0f ) {
+            lastCameraZoom = map.cameraPosition.zoom
+            lastCameraCenter = map.cameraPosition.target
+            return
+        }
+
+        if( !(lastCameraZoom-minZoomChange).rangeTo( lastCameraZoom+minZoomChange ).contains( map.cameraPosition.zoom )
+                || distance( map.cameraPosition.target.latitude, map.cameraPosition.target.longitude, lastCameraCenter.latitude, lastCameraCenter.longitude ) > margin ) {
+            AsyncDraw().execute()
+            lastCameraZoom = map.cameraPosition.zoom
+            lastCameraCenter = map.cameraPosition.target
+        }
     }
 
     /**
@@ -253,6 +337,4 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             findNewNeighbours(receivedCenterPoint, receivedDirection)
         }
     }
-
-
 }
