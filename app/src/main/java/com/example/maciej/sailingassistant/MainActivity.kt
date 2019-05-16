@@ -289,13 +289,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
      * i uruchamia DetailActivity z nowymi punktami
      */
 
-    fun findNewNeighbours(centerPointString: String, direction: String) {
+//    fun findNewNeighbours(centerPointString: String, direction: String) {
+    fun findNewNeighbours(centerDatetime: Datetime, direction: String) {
         val neighbourPoints = ArrayList<Point>(numberOfNeighbors + 1)
         var shiftIndex = 0
         val newCenterPointIndex: Int
 
         for (i in pointList.indices) {
-            if (pointList[i].toString() == centerPointString) {
+//            if (pointList[i]!!.datetime.toString() == centerPointString) {
+            if (pointList[i]!!.datetime == centerDatetime) {
                 if (direction == "right") {
                     shiftIndex += numberOfNeighbors
                 }
@@ -329,7 +331,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
      */
     private val mReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val receivedCenterPoint = intent.getStringExtra("center")
+//            val receivedCenterPoint = intent.getStringExtra("center")
+            val receivedCenterPoint = intent.getParcelableExtra<Datetime>("center")
             val receivedDirection = intent.getStringExtra("direction")
             Log.d("receiver1", "GOT MESSAGE 1: $receivedCenterPoint")
             Log.d("receiver2", "GOT MESSAGE 2: $receivedDirection")
