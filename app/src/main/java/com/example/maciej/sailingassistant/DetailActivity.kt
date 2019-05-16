@@ -16,7 +16,9 @@ class DetailActivity : AppCompatActivity() {
 
     lateinit var points: ArrayList<Point>
     lateinit var centerPoint: Point
-    var centerPointString = ""
+//    var centerPointString = ""
+    lateinit var centerDataTime : Datetime
+
     var direction = ""
     val numberOfNeighbors = 300
 
@@ -35,7 +37,8 @@ class DetailActivity : AppCompatActivity() {
         points = intent.getParcelableArrayListExtra("points")
 
         centerPoint = points[numberOfNeighbors / 2]
-        centerPointString = centerPoint.toString()
+//        centerPointString = centerPoint.datetime!!.toFormattedString()
+        centerDataTime = centerPoint.datetime!!
 
 
         mygestureDetector = GestureDetector(this@DetailActivity, MyGestureDetector())
@@ -74,7 +77,7 @@ class DetailActivity : AppCompatActivity() {
 
             //wysłąnie danych do MainActivity
             Log.d("sender", "BROADCASTING message")
-            val intent = Intent("center_intent").putExtra("center", centerPointString).putExtra("direction", direction)
+            val intent = Intent("center_intent").putExtra("center", centerDataTime).putExtra("direction", direction)
             LocalBroadcastManager.getInstance(this@DetailActivity).sendBroadcast(intent)
 
             return super.onFling(e1, e2, velocityX, velocityY)
