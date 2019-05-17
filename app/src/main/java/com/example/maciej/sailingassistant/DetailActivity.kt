@@ -67,7 +67,8 @@ class DetailActivity : AppCompatActivity() {
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {
                             onSwipeLeft()
-                        } else {
+                        }
+                        else {
                             onSwipeRight()
                         }
                     }
@@ -79,6 +80,7 @@ class DetailActivity : AppCompatActivity() {
             Log.d("sender", "BROADCASTING message")
             val intent = Intent("center_intent").putExtra("center", centerDataTime).putExtra("direction", direction)
             LocalBroadcastManager.getInstance(this@DetailActivity).sendBroadcast(intent)
+            finish()
 
             return super.onFling(e1, e2, velocityX, velocityY)
         }
@@ -95,6 +97,10 @@ class DetailActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    override fun onStop() {
+        super.onStop()
     }
 
 
