@@ -206,7 +206,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         //Odczytaj jaki przedział czasu był potrzebny ostatnio
         val preferences = getPreferences(Context.MODE_PRIVATE)
         with(preferences) {
