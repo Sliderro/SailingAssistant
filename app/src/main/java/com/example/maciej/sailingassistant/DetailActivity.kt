@@ -37,7 +37,6 @@ class DetailActivity : AppCompatActivity() {
         points = intent.getParcelableArrayListExtra("points")
 
         centerPoint = points[numberOfNeighbors / 2]
-//        centerPointString = centerPoint.datetime!!.toFormattedString()
         centerDataTime = centerPoint.datetime!!
 
 
@@ -60,27 +59,29 @@ class DetailActivity : AppCompatActivity() {
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
 
-            if (e1 != null && e2 != null) {     //sprawdza czy ruch był w lewo czy w prawo
+            if (e1 != null && e2 != null) {
                 val diffY = e2.y - e1.y
                 val diffX = e2.x - e1.x
+
+
                 if (Math.abs(diffX) > Math.abs(diffY)) {
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                        if (diffX > 0) {
+                        if (diffX > 0) {     //sprawdza czy ruch był w lewo czy w prawo
                             onSwipeLeft()
                         }
                         else {
                             onSwipeRight()
                         }
-                    }
-                }
-            }
-            textView.text = "points size = ${points.size}"
+                        textView.text = "points size = ${points.size}"
 
-            //wysłąnie danych do MainActivity
-            Log.d("sender", "BROADCASTING message")
-            val intent = Intent("center_intent").putExtra("center", centerDataTime).putExtra("direction", direction)
-            LocalBroadcastManager.getInstance(this@DetailActivity).sendBroadcast(intent)
-            finish()
+                        //wysłanie danych do MainActivity
+                        Log.d("sender", "BROADCASTING message")
+                        val intent = Intent("center_intent").putExtra("center", centerDataTime).putExtra("direction", direction)
+                        LocalBroadcastManager.getInstance(this@DetailActivity).sendBroadcast(intent)
+                        finish()
+                    }
+                }else{Log.d("scroll", "SCROLL")}
+            }
 
             return super.onFling(e1, e2, velocityX, velocityY)
         }
