@@ -19,6 +19,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.max
@@ -65,6 +66,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         override fun onCallback(points: ArrayList<Point?>) {
             pointList = points
             drawPath( true )
+            loadingCircle.visibility=View.GONE
         }
     }
 
@@ -96,6 +98,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         map?.setOnMapClickListener( this )
         map?.setOnCameraMoveListener( this )
         map?.moveCamera( CameraUpdateFactory.newLatLng( LatLng(51.107883, 17.038538) ) ) // Domyślnie Wrocław
+        loadingCircle.visibility=View.VISIBLE
         firebaseDatabaseManager.fetchPoints(startDatetime, endDatetime, firebaseCallback)
     }
 
@@ -217,8 +220,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         mapView = findViewById(R.id.map_view)
         mapView.onCreate(null)
         mapView.getMapAsync(this)
-
-
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, IntentFilter("center_intent"))  //do odbioru śr punktu i kierunku
 
     }
@@ -278,6 +279,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         val dateDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
             startDatetime = Datetime(year, month + 1, dayOfMonth, 0, 0, 0, 0)
             endDatetime = Datetime(year, month + 1, dayOfMonth, 23, 59, 59, 999)
+            loadingCircle.visibility=View.VISIBLE
             firebaseDatabaseManager.fetchPoints(startDatetime, endDatetime, firebaseCallback)
 
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
