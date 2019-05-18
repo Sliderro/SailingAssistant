@@ -21,7 +21,6 @@ class DetailActivity : AppCompatActivity() {
 
     lateinit var points: ArrayList<Point>
     lateinit var centerPoint: Point
-//    var centerPointString = ""
     lateinit var centerDataTime : Datetime
 
     var direction = ""
@@ -66,7 +65,7 @@ class DetailActivity : AppCompatActivity() {
         private val SWIPE_VELOCITY_THRESHOLD = 400
 
 
-        /*override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
 
             if (e1 != null && e2 != null) {
                 val diffY = e2.y - e1.y
@@ -93,7 +92,7 @@ class DetailActivity : AppCompatActivity() {
             }
 
             return super.onFling(e1, e2, velocityX, velocityY)
-        }*/
+        }
 
 
         private fun onSwipeRight() {
