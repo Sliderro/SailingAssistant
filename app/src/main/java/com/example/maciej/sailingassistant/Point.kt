@@ -63,4 +63,25 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0,
         }
     }
 
+    fun getField(fieldName: String): Double? {
+        return when(fieldName) {
+            "longtitude" ->  longitude
+            "latitude" ->  latitude
+            "windDirection" ->  windDirecion
+            "windSpeed" ->  windSpeed
+            "tensometers0" ->  tensometers[0]
+            "tensometers1" ->  tensometers[1]
+            "tensometers2" ->  tensometers[2]
+            "tensometers3" ->  tensometers[3]
+            "tensometers4" ->  tensometers[4]
+            "tensometers5" ->  tensometers[5]
+            "inclinations0" ->  inclinations[0]
+            "inclinations1" ->  inclinations[1]
+            "accelerometerX" ->  accelerometer["x"]
+            "accelerometerY" ->  accelerometer["y"]
+            "accelerometerZ" ->  accelerometer["z"]
+            else ->  null
+        }
+    }
+
 }
