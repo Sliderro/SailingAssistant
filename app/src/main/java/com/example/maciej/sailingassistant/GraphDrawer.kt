@@ -71,12 +71,12 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
             }
             "accelerometer" -> {
                 for(i in 0 until points.size) {
-                    if(max < abs(points[i].accelerometer.getValue("x")))
-                        max = points[i].accelerometer.getValue("x")
-                    if(max < abs(points[i].accelerometer.getValue("y")))
-                        max = points[i].accelerometer.getValue("y")
-                    if(max < abs(points[i].accelerometer.getValue("z")))
-                        max = points[i].accelerometer.getValue("z")
+                    if(max < abs(points[i].accelerometer["x"]!!))
+                        max = abs(points[i].accelerometer["x"]!!)
+                    if(max < abs(points[i].accelerometer["y"]!!))
+                        max = abs(points[i].accelerometer["y"]!!)
+                    if(max < abs(points[i].accelerometer["z"]!!))
+                        max = abs(points[i].accelerometer["y"]!!)
                 }
                 max = calcMax(max)
                 for(i in 0 until points.size -1){
