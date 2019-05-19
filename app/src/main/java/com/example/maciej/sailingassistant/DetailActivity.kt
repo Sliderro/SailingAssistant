@@ -42,8 +42,20 @@ class DetailActivity : AppCompatActivity() {
          * później można ewentualnie zaimplementować zapamiętanie przedostatniego punktu środkowego
          */
         points = intent.getParcelableArrayListExtra("points")
-        graphDrawer.points = points
-        graphDrawer.info = "tensometers"
+        wSpeed.points = points
+        tenso.points = points
+        wDirection.points = points
+        speed.points = points
+        acc.points = points
+        incl.points = points
+        gyroscope.points = points
+        wSpeed.info = "windSpeed"
+        tenso.info = "tensometers"
+        wDirection.info = "windDirection"
+        speed.info = "speed"
+        acc.info = "accelerometer"
+        incl.info = "inclinations"
+        gyroscope.info = "gyroscope"
         centerPoint = points[numberOfNeighbors / 2]
         centerDataTime = centerPoint.datetime!!
 
@@ -80,7 +92,7 @@ class DetailActivity : AppCompatActivity() {
                         else {
                             onSwipeRight()
                         }
-                        textView.text = "points size = ${points.size}"
+                        wsText.text = "points size = ${points.size}"
 
                         //wysłanie danych do MainActivity
                         Log.d("sender", "BROADCASTING message")

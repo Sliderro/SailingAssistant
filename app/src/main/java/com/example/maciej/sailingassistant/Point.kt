@@ -11,7 +11,7 @@ import com.google.firebase.database.IgnoreExtraProperties
  */
 @IgnoreExtraProperties
 data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0, val speed: Double = 0.0,
-                 val windDirecion: Double = 0.0, val windSpeed: Double = 0.0) : Parcelable {
+                 val windDirection: Double = 0.0, val windSpeed: Double = 0.0) : Parcelable {
     var datetime: Datetime? = Datetime(0, 0, 0, 0, 0, 0, 0)
     var tensometers: List<Double> = ArrayList(6)
     var inclinations: List<Double> = ArrayList(2)
@@ -19,8 +19,8 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0, val sp
     var gyroscope: Map<String,Double> = HashMap()
 
 
-    constructor(datetime: Datetime, longitude: Double, latitude: Double, windDirecion: Double, windSpeed: Double,
-                tensometers: ArrayList<Double>, inclinations: ArrayList<Double>, accelerometer: Map<String, Double>, gyroscope: Map<String,Double>) : this(longitude, latitude, windDirecion, windSpeed) {
+    constructor(datetime: Datetime, longitude: Double, latitude: Double, windDirection: Double, windSpeed: Double,
+                tensometers: ArrayList<Double>, inclinations: ArrayList<Double>, accelerometer: Map<String, Double>, gyroscope: Map<String,Double>) : this(longitude, latitude, windDirection, windSpeed) {
 
         this.datetime = datetime
         this.tensometers=tensometers
@@ -48,7 +48,7 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0, val sp
         parcel.writeDouble(longitude)
         parcel.writeDouble(latitude)
         parcel.writeDouble(speed)
-        parcel.writeDouble(windDirecion)
+        parcel.writeDouble(windDirection)
         parcel.writeDouble(windSpeed)
         parcel.writeParcelable(datetime, flags)
         parcel.writeList(tensometers)
@@ -76,7 +76,7 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0, val sp
             "longtitude" ->  longitude
             "latitude" ->  latitude
             "speed" -> speed
-            "windDirection" ->  windDirecion
+            "windDirection" ->  windDirection
             "windSpeed" ->  windSpeed
             "tensometers0" ->  tensometers[0]
             "tensometers1" ->  tensometers[1]
