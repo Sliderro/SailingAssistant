@@ -3,30 +3,35 @@ package com.example.maciej.sailingassistant
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.database.IgnoreExtraProperties
+
 
 /**
  * Klasa modelująca odczyty w danym punkcie czasu
  */
 @IgnoreExtraProperties
-data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0,
+data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0, val speed: Double = 0.0,
                  val windDirecion: Double = 0.0, val windSpeed: Double = 0.0) : Parcelable {
     var datetime: Datetime? = Datetime(0, 0, 0, 0, 0, 0, 0)
-    val tensometers: List<Double> = ArrayList(6)
-    val inclinations: List<Double> = ArrayList(2)
-    val accelerometer: Map<String, Double> = HashMap()
+    var tensometers: List<Double> = ArrayList(6)
+    var inclinations: List<Double> = ArrayList(2)
+    var accelerometer: Map<String, Double> = HashMap()
+    var gyroscope: Map<String,Double> = HashMap()
+
 
     constructor(datetime: Datetime, longitude: Double, latitude: Double, windDirecion: Double, windSpeed: Double,
-                tensometers: DoubleArray, inclinations: DoubleArray, accelerometer: Map<String, Double>) : this(longitude, latitude, windDirecion, windSpeed) {
+                tensometers: ArrayList<Double>, inclinations: ArrayList<Double>, accelerometer: Map<String, Double>, gyroscope: Map<String,Double>) : this(longitude, latitude, windDirecion, windSpeed) {
 
         this.datetime = datetime
-        System.arraycopy(tensometers, 0, this.tensometers, 0, tensometers.size)
-        System.arraycopy(inclinations, 0, this.inclinations, 0, inclinations.size)
+        this.tensometers=tensometers
+        this.inclinations=inclinations
+        this.accelerometer=accelerometer
+        this.gyroscope=gyroscope
     }
 
     constructor(parcel: Parcel) : this(
             //parcel.readParcelable(Datetime::class.java.classLoader),
+            parcel.readDouble(),
             parcel.readDouble(),
             parcel.readDouble(),
             parcel.readDouble(),
@@ -35,18 +40,21 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0,
         parcel.readList(tensometers, Double::class.java.classLoader)
         parcel.readList(inclinations, Double::class.java.classLoader)
         parcel.readMap(accelerometer, Double::class.java.classLoader)
+        parcel.readMap(gyroscope, Double::class.java.classLoader)
     }
 
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeDouble(longitude)
         parcel.writeDouble(latitude)
+        parcel.writeDouble(speed)
         parcel.writeDouble(windDirecion)
         parcel.writeDouble(windSpeed)
         parcel.writeParcelable(datetime, flags)
         parcel.writeList(tensometers)
         parcel.writeList(inclinations)
         parcel.writeMap(accelerometer)
+        parcel.writeMap(gyroscope)
     }
 
     override fun describeContents(): Int {
@@ -67,6 +75,7 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0,
         return when(fieldName) {
             "longtitude" ->  longitude
             "latitude" ->  latitude
+            "speed" -> speed
             "windDirection" ->  windDirecion
             "windSpeed" ->  windSpeed
             "tensometers0" ->  tensometers[0]
@@ -80,6 +89,9 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0,
             "accelerometerX" ->  accelerometer["x"]
             "accelerometerY" ->  accelerometer["y"]
             "accelerometerZ" ->  accelerometer["z"]
+            "gyroscopeX" ->  gyroscope["x"]
+            "gyroscopeY" ->  gyroscope["y"]
+            "gyroscopeZ" ->  gyroscope["z"]
             else ->  null
         }
     }
