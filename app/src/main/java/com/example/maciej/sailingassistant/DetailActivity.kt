@@ -1,6 +1,5 @@
 package com.example.maciej.sailingassistant
 
-import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.GestureDetector
@@ -8,33 +7,35 @@ import android.view.MotionEvent
 import java.util.*
 import android.support.v4.content.LocalBroadcastManager
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.util.AttributeSet
-import android.util.DisplayMetrics
+import android.graphics.Color
 import android.util.Log
 import android.view.View
+import android.widget.TextView
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.android.synthetic.main.activity_detail.*
 
 
-class DetailActivity : AppCompatActivity() {
+class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     lateinit var points: ArrayList<Point>
     lateinit var centerPoint: Point
-    lateinit var centerDataTime : Datetime
+    lateinit var centerDataTime: Datetime
 
     var direction = ""
     val numberOfNeighbors = 300
-    var width = 0
-    var height = 0
 
     lateinit var mygestureDetector: GestureDetector
-
+    lateinit var map: GoogleMap
+    private lateinit var mapView: MapView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
-
 
         /**
          * działa tak, że ZAWSZE PRZESYŁA 301 PUNKTÓW i działa
@@ -48,6 +49,15 @@ class DetailActivity : AppCompatActivity() {
         centerDataTime = centerPoint.datetime!!
 
 
+        mapView = findViewById(R.id.mapView2)
+        mapView.onCreate(null)
+        mapView.getMapAsync(this)
+
+        //wyswietlanie godziny
+        var tTime = findViewById<TextView>(R.id.tTime)
+        tTime.text = "${points.first().datetime?.hour}:${points.first().datetime?.minute}:${points.first().datetime?.second}" +
+                " - ${points.last().datetime?.hour}:${points.last().datetime?.minute}:${points.last().datetime?.second}"
+
         mygestureDetector = GestureDetector(this@DetailActivity, MyGestureDetector())
 
         val touchListener = View.OnTouchListener { v, event ->
@@ -55,6 +65,35 @@ class DetailActivity : AppCompatActivity() {
         }
         scrollView2.setOnTouchListener(touchListener)
     }
+
+    /**
+     * Obsluga mapy
+     */
+    override fun onMapClick(p0: LatLng?) {
+        println(p0)
+    }
+
+    override fun onMapReady(map: GoogleMap?) {
+        if (map != null) this.map = map
+        map?.setMinZoomPreference(17.0f)
+        drawRoute(points)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    private fun drawRoute(points: ArrayList<Point>) {
+        if (points.isNotEmpty()) {
+            val startLatitude = points[numberOfNeighbors / 2].latitude
+            val startLongitude = points[numberOfNeighbors / 2].longitude
+            val startPosition = LatLng(startLatitude, startLongitude)
+            map.moveCamera(CameraUpdateFactory.newLatLng(startPosition))
+            for (i in 0..points.size - 2) map.addPolyline(PolylineOptions().add(LatLng(points[i].latitude, points[i].longitude), LatLng(points[i + 1].latitude, points[i + 1].longitude)).width(5.0f).color(Color.BLUE))
+        }
+    }
+
 
     /**
      * Klasa obsługująca gesty
@@ -76,8 +115,7 @@ class DetailActivity : AppCompatActivity() {
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {     //sprawdza czy ruch był w lewo czy w prawo
                             onSwipeLeft()
-                        }
-                        else {
+                        } else {
                             onSwipeRight()
                         }
                         textView.text = "points size = ${points.size}"
@@ -88,7 +126,9 @@ class DetailActivity : AppCompatActivity() {
                         LocalBroadcastManager.getInstance(this@DetailActivity).sendBroadcast(intent)
                         finish()
                     }
-                }else{Log.d("scroll", "SCROLL")}
+                } else {
+                    Log.d("scroll", "SCROLL")
+                }
             }
 
             return super.onFling(e1, e2, velocityX, velocityY)
@@ -105,13 +145,11 @@ class DetailActivity : AppCompatActivity() {
             Log.e("ViewSwipe", "LEFT")
         }
 
-
     }
 
     override fun onStop() {
         super.onStop()
     }
-
 
 
 }
