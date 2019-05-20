@@ -39,7 +39,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             pointList = points
             drawPathDetailed()
             map.moveCamera( CameraUpdateFactory.zoomBy( 8.0f ) )
-            map.moveCamera( CameraUpdateFactory.newLatLng( LatLng( pointList[0]!!.latitude, pointList[0]!!.longitude ) ) )
+            if(points.isNotEmpty()) {
+                map.moveCamera(CameraUpdateFactory.newLatLng(LatLng(pointList[0]!!.latitude, pointList[0]!!.longitude)))
+            }
             loadingCircle.visibility=View.GONE
         }
     }
