@@ -28,6 +28,8 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
 
     var direction = ""
     val numberOfNeighbors = 300
+    var width = 0
+    var height = 0
 
     lateinit var mygestureDetector: GestureDetector
     lateinit var map: GoogleMap
@@ -37,14 +39,27 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
+
         /**
          * działa tak, że ZAWSZE PRZESYŁA 301 PUNKTÓW i działa
          * na razie przy dojściu do końca odcinka wytraca się punkt od którego zaczęliśmy;
          * później można ewentualnie zaimplementować zapamiętanie przedostatniego punktu środkowego
          */
         points = intent.getParcelableArrayListExtra("points")
-        graphDrawer.points = points
-        graphDrawer.info = "tensometers"
+        wSpeed.points = points
+        tenso.points = points
+        wDirection.points = points
+        speed.points = points
+        acc.points = points
+        incl.points = points
+        gyroscope.points = points
+        wSpeed.info = "windSpeed"
+        tenso.info = "tensometers"
+        wDirection.info = "windDirection"
+        speed.info = "speed"
+        acc.info = "accelerometer"
+        incl.info = "inclinations"
+        gyroscope.info = "gyroscope"
         centerPoint = points[numberOfNeighbors / 2]
         centerDataTime = centerPoint.datetime!!
 
@@ -115,10 +130,11 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {     //sprawdza czy ruch był w lewo czy w prawo
                             onSwipeLeft()
-                        } else {
+                        }
+                        else {
                             onSwipeRight()
                         }
-                        textView.text = "points size = ${points.size}"
+                        wsText.text = "points size = ${points.size}"
 
                         //wysłanie danych do MainActivity
                         Log.d("sender", "BROADCASTING message")
@@ -145,11 +161,9 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
             Log.e("ViewSwipe", "LEFT")
         }
 
+
     }
 
-    override fun onStop() {
-        super.onStop()
-    }
 
 
 }
