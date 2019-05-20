@@ -30,8 +30,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     lateinit var map: GoogleMap
     private lateinit var mapView: MapView
     private val firebaseDatabaseManager = FirebaseDatabaseManager
-    var startDatetime: Datetime = Datetime(0, 0, 0, 0, 0, 0, 0)
-    var endDatetime: Datetime = Datetime(0, 0, 0, 0, 0, 0, 0)
+    var dayToLoad = "2019-05-19"
     var pointList = ArrayList<Point?>()
     val numberOfNeighbors = 300
 
@@ -99,7 +98,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         map?.setOnCameraMoveListener( this )
         map?.moveCamera( CameraUpdateFactory.newLatLng( LatLng(51.107883, 17.038538) ) ) // Domyślnie Wrocław
         loadingCircle.visibility=View.VISIBLE
-        firebaseDatabaseManager.fetchPoints(startDatetime, endDatetime, firebaseCallback)
+        firebaseDatabaseManager.fetchPoints(dayToLoad, firebaseCallback)
     }
 
     private var bounds: LatLngBounds? = null
@@ -212,8 +211,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         //Odczytaj jaki przedział czasu był potrzebny ostatnio
         val preferences = getPreferences(Context.MODE_PRIVATE)
         with(preferences) {
-            startDatetime = Datetime.fromString(getString("START_DATETIME", Datetime.zeroDatetimeString)!!)
-            endDatetime = Datetime.fromString(getString("END_DATETIME", Datetime.zeroDatetimeString)!!)
+            dayToLoad = getString("DAY_TO_LOAD", "")!!
         }
 
         mapView = findViewById(R.id.map_view)
@@ -237,8 +235,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         //Zapisz wybrany przedział czasu do preferencji
         val preferences = getPreferences(Context.MODE_PRIVATE)
         with(preferences.edit()) {
-            putString("START_DATETIME", startDatetime.toFormattedString())
-            putString("END_DATETIME", endDatetime.toFormattedString())
+            putString("DAY_TO_LOAD",dayToLoad)
             apply()
         }
         super.onStop()
@@ -276,10 +273,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     fun showDatePickerDialog(view: View) {
         val calendar = Calendar.getInstance()
         val dateDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
-            startDatetime = Datetime(year, month + 1, dayOfMonth, 0, 0, 0, 0)
-            endDatetime = Datetime(year, month + 1, dayOfMonth, 23, 59, 59, 999)
+            val yearS = Datetime.addZeroPadding(4, year.toString())
+            val monthS = Datetime.addZeroPadding(2, (month+1).toString())
+            val dayS = Datetime.addZeroPadding(2, dayOfMonth.toString())
+            val dateString = "$yearS-$monthS-$dayS"
             loadingCircle.visibility=View.VISIBLE
-            firebaseDatabaseManager.fetchPoints(startDatetime, endDatetime, firebaseCallback)
+            firebaseDatabaseManager.fetchPoints(dateString, firebaseCallback)
 
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
         dateDialog.show()

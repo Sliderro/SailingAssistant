@@ -56,6 +56,17 @@ data class Datetime(val year:Int, val month:Int, val day:Int, val hour:Int, val 
             return Datetime(yearString.toInt(),monthString.toInt(),dayString.toInt(),hourString.toInt(),minuteString.toInt(),secondString.toInt(),milisecondString.toInt())
         }
 
+        /**
+         * Dodaje zera do początku stringa do uzyskania żądanej długości, np addedZeroPadding(3,"a")==00a
+         */
+        fun addZeroPadding(desiredLength: Int, string: String): String {
+            var res = string
+            while(res.length<desiredLength) {
+                res = "0$res"
+            }
+            return res
+        }
+
     }
 
     override fun compareTo(other: Datetime): Int {
@@ -89,15 +100,6 @@ data class Datetime(val year:Int, val month:Int, val day:Int, val hour:Int, val 
         return "$yearS-$monthS-${dayS}T$hourS:$minuteS:$secondS:${milisecondS}Z"
     }
 
-    /**
-     * Dodaje zera do początku stringa do uzyskania żądanej długości, np addedZeroPadding(3,"a")==00a
-     */
-    private fun addZeroPadding(desiredLength: Int, string: String): String {
-        var res = string
-        while(res.length<desiredLength) {
-            res = "0$res"
-        }
-        return res
-    }
+
 
 }

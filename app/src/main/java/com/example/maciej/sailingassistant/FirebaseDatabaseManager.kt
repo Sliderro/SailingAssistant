@@ -20,8 +20,13 @@ object FirebaseDatabaseManager {
         db = FirebaseDatabase.getInstance().reference
     }
 
-    fun fetchPoints(startDatetime: Datetime, endDatetime: Datetime, firebaseCallback: FirebaseCallback) {
-        val query = db.child("boats").child("twR0OqZbv3b875Y8NSnjR39leZi2").orderByKey().startAt(startDatetime.toFormattedString()).endAt(endDatetime.toFormattedString())
+    /**
+     * pobiera punkty z danego dnia zadanego stringiem w postaci: yyyy-mm-dd
+     */
+    fun fetchPoints(dateString: String, firebaseCallback: FirebaseCallback) {
+        val fetchDate = if(dateString =="") "a" else dateString
+
+        val query = db.child("logs").child("twR0OqZbv3b875Y8NSnjR39leZi2").child(fetchDate)
         query.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 Log.d("myDB", p0.message)
