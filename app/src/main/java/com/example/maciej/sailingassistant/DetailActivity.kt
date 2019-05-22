@@ -100,13 +100,23 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
     }
 
     private fun drawRoute(points: ArrayList<Point>) {
-        if (points.isNotEmpty()) {
-            val startLatitude = points[numberOfNeighbors / 2].latitude
-            val startLongitude = points[numberOfNeighbors / 2].longitude
-            val startPosition = LatLng(startLatitude, startLongitude)
-            map.moveCamera(CameraUpdateFactory.newLatLng(startPosition))
-            for (i in 0..points.size - 2) map.addPolyline(PolylineOptions().add(LatLng(points[i].latitude, points[i].longitude), LatLng(points[i + 1].latitude, points[i + 1].longitude)).width(5.0f).color(Color.BLUE))
-        }
+        val startLatitude = points[numberOfNeighbors / 2].latitude
+        val startLongitude = points[numberOfNeighbors / 2].longitude
+        val startPosition = LatLng(startLatitude, startLongitude)
+        map.moveCamera(CameraUpdateFactory.newLatLng(startPosition))
+        object: Thread() {
+            override fun run() {
+                super.run()
+                val p = PolylineOptions().width(5.0f).color(Color.BLUE)
+                for( i in 0..(points.size-2) ) {
+                    p.add( LatLng( points[i].latitude, points[i].longitude ), LatLng( points[i+1].latitude, points[i+1].longitude ) )
+                }
+                runOnUiThread {
+                    map.clear()
+                    map.addPolyline( p )
+                }
+            }
+        }.start()
     }
 
 
