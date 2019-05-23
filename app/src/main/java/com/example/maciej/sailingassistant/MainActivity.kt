@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     }
 
     fun drawPathDetailed() {
-        val t = object: Thread() {
+        object: Thread() {
             override fun run() {
                 super.run()
                 val p = PolylineOptions().width(5.0f).color(Color.BLUE)
