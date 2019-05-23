@@ -69,7 +69,6 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
         mapView.getMapAsync(this)
 
         //wyswietlanie godziny
-        var tTime = findViewById<TextView>(R.id.tTime)
         tTime.text = "${points.first().datetime?.hour}:${points.first().datetime?.minute}:${points.first().datetime?.second}" +
                 " - ${points.last().datetime?.hour}:${points.last().datetime?.minute}:${points.last().datetime?.second}"
 

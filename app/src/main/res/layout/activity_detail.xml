@@ -42,7 +42,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="150dp"/>
             <TextView
-                    android:text="TextView"
+                    android:text="Wind Speed"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="8dp"
@@ -60,7 +60,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"/>
             <TextView
-                    android:text="TextView"
+                    android:text="Wind Direction"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="8dp"
@@ -78,7 +78,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"/>
             <TextView
-                    android:text="TextView"
+                    android:text="Speed"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="8dp"
@@ -97,7 +97,7 @@
                     android:layout_marginBottom="8dp"/>
 
             <TextView
-                    android:text="TextView"
+                    android:text="Inclinations"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="8dp"
@@ -115,7 +115,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"/>
             <TextView
-                    android:text="TextView"
+                    android:text="Tensometers"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="8dp"
@@ -133,7 +133,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"/>
             <TextView
-                    android:text="TextView"
+                    android:text="Acceleration"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="8dp"
@@ -151,7 +151,7 @@
                     android:layout_marginEnd="8dp"
                     android:layout_marginBottom="8dp"/>
             <TextView
-                    android:text="TextView"
+                    android:text="Gyroscope"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="8dp"

@@ -1,6 +1,7 @@
 package com.example.maciej.sailingassistant
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
@@ -13,19 +14,22 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
     var points = ArrayList<Point>()
     var max = 0.0
     var info = ""
-    //fun Float.toPx() : Float = (this * Resources.getSystem().displayMetrics.density)
+    fun Float.toPx() : Float = (this * Resources.getSystem().displayMetrics.density)
 
     override fun draw(canvas: Canvas){
 
 
         super.draw(canvas)
-        val startY = 1f
-        val startX = 1f
+        val startY = 10f
+        val startX = 40f.toPx()
         val stopY = height.toFloat() - 1
         val stopX = width.toFloat() - 1
         val middleY = height.toFloat()/2
         val step = (stopX - startX)/points.size
         val black = Paint()
+        val brush = Paint()
+        brush.setARGB(255,0,0,0)
+        brush.textSize = 20f
         val paintArray = Array(6) {Paint()}
         black.setARGB(255,0,0,0)
         paintArray[0].setARGB(255,255,0,0)
@@ -43,12 +47,15 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
                 for(i in 0 until points.size) if(max < points[i].windSpeed) max = points[i].windSpeed
                 max = calcMax(max)
                 for(i in 0 until points.size - 1){
-                    val x1 = step * i
+                    val x1 = startX + step * i
                     val y1 = (stopY - (stopY / max) * points[i].windSpeed).toFloat()
-                    val x2 = step * (i + 1)
+                    val x2 = startX + step * (i + 1)
                     val y2 = (stopY - (stopY / max) * points[i+1].windSpeed).toFloat()
                     canvas.drawLine(x1,y1,x2,y2,paintArray[0])
                 }
+                canvas.drawText("$max",0f,20f,brush)
+                canvas.drawText("${max/2}", 0f, middleY + 10,brush)
+                canvas.drawText("0", 0f, stopY, brush)
             }
             "tensometers" -> {
                 for(i in 0 until points.size) {
@@ -58,8 +65,8 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
                 }
                 max = calcMax(max)
                 for(i in 0 until points.size - 1){
-                    val x1 = step * i
-                    val x2 = step * (i+1)
+                    val x1 = startX + step * i
+                    val x2 = startX + step * (i+1)
                     val first = FloatArray(points[i].tensometers.size)
                     val second = FloatArray(points[i].tensometers.size)
                     for(j in 0 until points[i].tensometers.size){
@@ -68,6 +75,9 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
                         canvas.drawLine(x1,first[j],x2,second[j],paintArray[j])
                     }
                 }
+                canvas.drawText("$max",0f,20f,brush)
+                canvas.drawText("${max/2}", 0f, middleY + 10,brush)
+                canvas.drawText("0", 0f, stopY, brush)
             }
             "accelerometer" -> {
                 for(i in 0 until points.size) {
@@ -80,8 +90,8 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
                 }
                 max = calcMax(max)
                 for(i in 0 until points.size -1){
-                    val x1 = step * i
-                    val x2 = step * (i+1)
+                    val x1 = startX + step * i
+                    val x2 = startX + step * (i+1)
                     val yx1 = (middleY - (middleY/max) * points[i].accelerometer["x"]!!).toFloat()
                     val yx2 = (middleY - (middleY/max) * points[i+1].accelerometer["x"]!!).toFloat()
                     val yy1 = (middleY - (middleY/max) * points[i].accelerometer["y"]!!).toFloat()
@@ -92,12 +102,15 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
                     canvas.drawLine(x1,yy1,x2,yy2,paintArray[1])
                     canvas.drawLine(x1,yz1,x2,yz2,paintArray[2])
                 }
+                canvas.drawText("$max",0f,20f,brush)
+                canvas.drawText("0", 0f, middleY + 10,brush)
+                canvas.drawText("${0-max}", 0f, stopY, brush)
             }
             "gyroscope" -> {
                 max = 90.0
                 for(i in 0 until points.size -1){
-                    val x1 = step * i
-                    val x2 = step * (i+1)
+                    val x1 = startX + step * i
+                    val x2 = startX + step * (i+1)
                     val yx1 = (middleY - (middleY/max) * points[i].gyroscope["x"]!!).toFloat()
                     val yx2 = (middleY - (middleY/max) * points[i+1].gyroscope["x"]!!).toFloat()
                     val yy1 = (middleY - (middleY/max) * points[i].gyroscope["y"]!!).toFloat()
@@ -108,12 +121,15 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
                     canvas.drawLine(x1,yy1,x2,yy2,paintArray[1])
                     canvas.drawLine(x1,yz1,x2,yz2,paintArray[2])
                 }
+                canvas.drawText("$max",0f,20f,brush)
+                canvas.drawText("0", 0f, middleY + 10,brush)
+                canvas.drawText("${0-max}", 0f, stopY, brush)
             }
             "inclinations" -> {
                 max = 90.0
                 for(i in 0 until points.size - 1){
-                    val x1 = step * i
-                    val x2 = step * (i+1)
+                    val x1 = startX + step * i
+                    val x2 = startX + step * (i+1)
                     val first = FloatArray(points[i].inclinations.size)
                     val second = FloatArray(points[i].inclinations.size)
                     for(j in 0 until points[i].inclinations.size){
@@ -122,27 +138,36 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
                         canvas.drawLine(x1,first[j],x2,second[j],paintArray[j])
                     }
                 }
+                canvas.drawText("$max",0f,20f,brush)
+                canvas.drawText("0", 0f, middleY + 10,brush)
+                canvas.drawText("${0-max}", 0f, stopY, brush)
             }
             "windDirection" -> {
                 max = 360.0
                 for(i in 0 until points.size -1){
-                    val x1 = step * i
-                    val x2 = step * (i+1)
+                    val x1 = startX + step * i
+                    val x2 = startX + step * (i+1)
                     val y1 = (stopY - (stopY / max) * points[i].windDirection).toFloat()
                     val y2 = (stopY - (stopY / max) * points[i+1].windDirection).toFloat()
                     canvas.drawLine(x1,y1,x2,y2,paintArray[0])
                 }
+                canvas.drawText("$max",0f,20f,brush)
+                canvas.drawText("${max/2}", 0f, middleY + 10,brush)
+                canvas.drawText("0", 0f, stopY, brush)
             }
             "speed" -> {
                 for(i in 0 until points.size) if(max < points[i].speed) max = points[i].speed
                 max = calcMax(max)
                 for(i in 0 until points.size -1){
-                    val x1 = step * i
-                    val x2 = step * (i+1)
+                    val x1 = startX + step * i
+                    val x2 = startX + step * (i+1)
                     val y1 = (stopY - (stopY / max) * points[i].speed).toFloat()
                     val y2 = (stopY - (stopY / max) * points[i+1].speed).toFloat()
                     canvas.drawLine(x1,y1,x2,y2,paintArray[0])
                 }
+                canvas.drawText("$max",0f,20f,brush)
+                canvas.drawText("${max/2}", 0f, middleY + 10,brush)
+                canvas.drawText("0", 0f, stopY, brush)
             }
             else -> println("nie dziala")
         }
