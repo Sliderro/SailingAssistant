@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import android.view.View
@@ -74,7 +75,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         map?.setOnMapClickListener( this )
         map?.moveCamera( CameraUpdateFactory.newLatLng( LatLng(51.107883, 17.038538) ) ) // Domyślnie Wrocław
         loadingCircle.visibility=View.VISIBLE
-        firebaseDatabaseManager.fetchPoints(dayToLoad, firebaseCallback)
+        if( pointList.isEmpty() ) firebaseDatabaseManager.fetchPoints(dayToLoad, firebaseCallback)
+        else {
+            drawPathDetailed()
+            map?.moveCamera( CameraUpdateFactory.zoomBy( 8.0f ) )
+            map?.moveCamera(CameraUpdateFactory.newLatLng(LatLng(pointList[0]!!.latitude, pointList[0]!!.longitude)))
+            loadingCircle.visibility=View.GONE
+        }
     }
 
     fun drawPathDetailed() {
@@ -140,10 +147,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //Odczytaj jaki przedział czasu był potrzebny ostatnio
-        val preferences = getPreferences(Context.MODE_PRIVATE)
-        with(preferences) {
-            dayToLoad = getString("DAY_TO_LOAD", "")!!
+
+        if( savedInstanceState != null ) {
+            dayToLoad = savedInstanceState.getString( "dayToLoad", "" )
+            pointList = savedInstanceState.getParcelableArrayList( "pointList" )!!
+        }
+        else {
+            //Odczytaj jaki przedział czasu był potrzebny ostatnio
+            val preferences = getPreferences(Context.MODE_PRIVATE)
+            with(preferences) {
+                dayToLoad = getString("DAY_TO_LOAD", "")!!
+            }
         }
 
         mapView = findViewById(R.id.map_view)
@@ -210,6 +224,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             val dayS = Datetime.addZeroPadding(2, dayOfMonth.toString())
             val dateString = "$yearS-$monthS-$dayS"
             loadingCircle.visibility=View.VISIBLE
+            dayToLoad = dateString // potrzebne do rotacji
             firebaseDatabaseManager.fetchPoints(dateString, firebaseCallback)
 
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
@@ -271,5 +286,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             Log.d("receiver2", "GOT MESSAGE 2: $receivedDirection")
             findNewNeighbours(receivedCenterPoint, receivedDirection)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.d( "onSaveInstanceState", "Day: $dayToLoad" )
+        outState?.putString( "dayToLoad", dayToLoad )
+        Log.d( "onSaveInstanceState", "Points: ${pointList.size}" )
+        outState?.putParcelableArrayList( "pointList", pointList )
     }
 }
