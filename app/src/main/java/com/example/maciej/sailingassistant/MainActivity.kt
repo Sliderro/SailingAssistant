@@ -33,7 +33,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     private val firebaseDatabaseManager = FirebaseDatabaseManager
     var pointList = firebaseDatabaseManager.points
     var dayToLoad = "2019-05-19"
-    val numberOfNeighbors = 300
+    var numberOfNeighbors = 300
+
 
     private val firebaseCallback = object : FirebaseCallback {
         override fun onPointsFetched() {
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             if (pointList.isNotEmpty()) {
                 map.moveCamera(CameraUpdateFactory.newLatLng(LatLng(pointList[0]!!.latitude, pointList[0]!!.longitude)))
             }
-            loadingCircle.visibility=View.GONE
+            loadingCircle.visibility = View.GONE
         }
     }
 
@@ -77,12 +78,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         if (pointList.isEmpty()) {
             loadingCircle.visibility = View.VISIBLE
             firebaseDatabaseManager.fetchPoints(dayToLoad, firebaseCallback)
-        }
-        else {
+        } else {
             drawPathDetailed()
-            map?.moveCamera( CameraUpdateFactory.zoomBy( 8.0f ) )
+            map?.moveCamera(CameraUpdateFactory.zoomBy(8.0f))
             map?.moveCamera(CameraUpdateFactory.newLatLng(LatLng(pointList[0]!!.latitude, pointList[0]!!.longitude)))
-            loadingCircle.visibility=View.GONE
+            loadingCircle.visibility = View.GONE
         }
     }
 
@@ -91,15 +91,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             override fun run() {
                 super.run()
                 val p = PolylineOptions().width(5.0f).color(Color.BLUE)
-                for( i in 0..(pointList.size-2) ) {
-                    p.add( LatLng( pointList[i]!!.latitude, pointList[i]!!.longitude ), LatLng( pointList[i+1]!!.latitude, pointList[i+1]!!.longitude ) )
+                for (i in 0..(pointList.size - 2)) {
+                    p.add(LatLng(pointList[i]!!.latitude, pointList[i]!!.longitude), LatLng(pointList[i + 1]!!.latitude, pointList[i + 1]!!.longitude))
                 }
-                runOnUiThread( object: Runnable {
+                runOnUiThread(object : Runnable {
                     override fun run() {
                         map.clear()
-                        map.addPolyline( p )
+                        map.addPolyline(p)
                     }
-                } )
+                })
             }
         }.start()
     }
@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         //Zapisz wybrany przedział czasu do preferencji
         val preferences = getPreferences(Context.MODE_PRIVATE)
         with(preferences.edit()) {
-            putString("DAY_TO_LOAD",dayToLoad)
+            putString("DAY_TO_LOAD", dayToLoad)
             apply()
         }
         super.onStop()
@@ -216,10 +216,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         val calendar = Calendar.getInstance()
         val dateDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
             val yearS = Datetime.addZeroPadding(4, year.toString())
-            val monthS = Datetime.addZeroPadding(2, (month+1).toString())
+            val monthS = Datetime.addZeroPadding(2, (month + 1).toString())
             val dayS = Datetime.addZeroPadding(2, dayOfMonth.toString())
             val dateString = "$yearS-$monthS-$dayS"
-            loadingCircle.visibility=View.VISIBLE
+            loadingCircle.visibility = View.VISIBLE
             dayToLoad = dateString // potrzebne do rotacji
             firebaseDatabaseManager.fetchPoints(dateString, firebaseCallback)
 
@@ -233,14 +233,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
      * i uruchamia DetailActivity z nowymi punktami
      */
 
-//    fun findNewNeighbours(centerPointString: String, direction: String) {
     fun findNewNeighbours(centerDatetime: Datetime, direction: String) {
         val neighbourPoints = ArrayList<Point>(numberOfNeighbors + 1)
         var shiftIndex = 0
         val newCenterPointIndex: Int
 
         for (i in pointList.indices) {
-//            if (pointList[i]!!.datetime.toString() == centerPointString) {
             if (pointList[i]!!.datetime == centerDatetime) {
                 if (direction == "right") {
                     shiftIndex += numberOfNeighbors
@@ -275,7 +273,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
      */
     private val mReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-//            val receivedCenterPoint = intent.getStringExtra("center")
             val receivedCenterPoint = intent.getParcelableExtra<Datetime>("center")
             val receivedDirection = intent.getStringExtra("direction")
             Log.d("receiver1", "GOT MESSAGE 1: $receivedCenterPoint")
