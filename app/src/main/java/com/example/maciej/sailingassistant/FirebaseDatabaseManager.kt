@@ -42,7 +42,7 @@ object FirebaseDatabaseManager {
                     points.add(currentPoint)
                     Log.d("myDB", currentPoint.toString())
                 }
-                firebaseCallback.onCallback(points) //żeby można było użyć danych poza tą metodą
+                firebaseCallback.onPointsFetched()
             }
         })
 

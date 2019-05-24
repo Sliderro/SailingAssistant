@@ -31,16 +31,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     lateinit var map: GoogleMap
     private lateinit var mapView: MapView
     private val firebaseDatabaseManager = FirebaseDatabaseManager
+    var pointList = firebaseDatabaseManager.points
     var dayToLoad = "2019-05-19"
-    var pointList = ArrayList<Point?>()
     val numberOfNeighbors = 300
 
     private val firebaseCallback = object : FirebaseCallback {
-        override fun onCallback(points: ArrayList<Point?>) {
-            pointList = points
+        override fun onPointsFetched() {
             drawPathDetailed()
-            map.moveCamera( CameraUpdateFactory.zoomBy( 8.0f ) )
-            if(points.isNotEmpty()) {
+            map.moveCamera(CameraUpdateFactory.zoomBy(8.0f))
+            if (pointList.isNotEmpty()) {
                 map.moveCamera(CameraUpdateFactory.newLatLng(LatLng(pointList[0]!!.latitude, pointList[0]!!.longitude)))
             }
             loadingCircle.visibility=View.GONE
@@ -72,10 +71,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     override fun onMapReady(map: GoogleMap?) {
         if (map != null) this.map = map
         map?.setMinZoomPreference(16.0f)
-        map?.setOnMapClickListener( this )
-        map?.moveCamera( CameraUpdateFactory.newLatLng( LatLng(51.107883, 17.038538) ) ) // Domyślnie Wrocław
-        loadingCircle.visibility=View.VISIBLE
-        if( pointList.isEmpty() ) firebaseDatabaseManager.fetchPoints(dayToLoad, firebaseCallback)
+        map?.setOnMapClickListener(this)
+        map?.moveCamera(CameraUpdateFactory.newLatLng(LatLng(51.107883, 17.038538))) // Domyślnie Wrocław
+
+        if (pointList.isEmpty()) {
+            loadingCircle.visibility = View.VISIBLE
+            firebaseDatabaseManager.fetchPoints(dayToLoad, firebaseCallback)
+        }
         else {
             drawPathDetailed()
             map?.moveCamera( CameraUpdateFactory.zoomBy( 8.0f ) )
@@ -85,7 +87,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     }
 
     fun drawPathDetailed() {
-        object: Thread() {
+        object : Thread() {
             override fun run() {
                 super.run()
                 val p = PolylineOptions().width(5.0f).color(Color.BLUE)
@@ -148,16 +150,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if( savedInstanceState != null ) {
-            dayToLoad = savedInstanceState.getString( "dayToLoad", "" )
-            pointList = savedInstanceState.getParcelableArrayList( "pointList" )!!
-        }
-        else {
-            //Odczytaj jaki przedział czasu był potrzebny ostatnio
-            val preferences = getPreferences(Context.MODE_PRIVATE)
-            with(preferences) {
-                dayToLoad = getString("DAY_TO_LOAD", "")!!
-            }
+        //Odczytaj jaki przedział czasu był potrzebny ostatnio
+        val preferences = getPreferences(Context.MODE_PRIVATE)
+        with(preferences) {
+            dayToLoad = getString("DAY_TO_LOAD", "")!!
         }
 
         mapView = findViewById(R.id.map_view)
@@ -286,13 +282,5 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             Log.d("receiver2", "GOT MESSAGE 2: $receivedDirection")
             findNewNeighbours(receivedCenterPoint, receivedDirection)
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        Log.d( "onSaveInstanceState", "Day: $dayToLoad" )
-        outState?.putString( "dayToLoad", dayToLoad )
-        Log.d( "onSaveInstanceState", "Points: ${pointList.size}" )
-        outState?.putParcelableArrayList( "pointList", pointList )
     }
 }
