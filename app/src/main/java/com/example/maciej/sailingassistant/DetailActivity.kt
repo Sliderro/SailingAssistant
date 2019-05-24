@@ -26,14 +26,15 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
     lateinit var centerPoint: Point
     lateinit var centerDataTime: Datetime
 
+    var mainActivity = MainActivity()
     var direction = ""
-    val numberOfNeighbors = 300
-    var width = 0
-    var height = 0
 
     lateinit var mygestureDetector: GestureDetector
     lateinit var map: GoogleMap
     private lateinit var mapView: MapView
+
+
+    var numberOfNeighborsDetail = mainActivity.numberOfNeighbors
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +61,11 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
         acc.info = "accelerometer"
         incl.info = "inclinations"
         gyroscope.info = "gyroscope"
-        centerPoint = points[numberOfNeighbors / 2]
+
+        //jeśli wszystkich danych jest mniej niż wskazano w MainActivity (300) to wyświetlamy je wszystkie i blokujemy przewijanie w bok
+        numberOfNeighborsDetail = if (points.size >= mainActivity.numberOfNeighbors) mainActivity.numberOfNeighbors else points.size
+
+        centerPoint = points[numberOfNeighborsDetail / 2]
         centerDataTime = centerPoint.datetime!!
 
 
@@ -99,8 +104,8 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
     }
 
     private fun drawRoute(points: ArrayList<Point>) {
-        val startLatitude = points[numberOfNeighbors / 2].latitude
-        val startLongitude = points[numberOfNeighbors / 2].longitude
+        val startLatitude = points[numberOfNeighborsDetail / 2].latitude
+        val startLongitude = points[numberOfNeighborsDetail / 2].longitude
         val startPosition = LatLng(startLatitude, startLongitude)
         map.moveCamera(CameraUpdateFactory.newLatLng(startPosition))
         object: Thread() {
@@ -135,7 +140,7 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
                 val diffX = e2.x - e1.x
 
 
-                if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (Math.abs(diffX) > Math.abs(diffY) && numberOfNeighborsDetail >= mainActivity.numberOfNeighbors) {
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {     //sprawdza czy ruch był w lewo czy w prawo
                             onSwipeLeft()
