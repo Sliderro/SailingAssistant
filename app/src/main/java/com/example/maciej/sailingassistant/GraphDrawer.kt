@@ -12,23 +12,12 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
     : View(context, attributeSet) {
 
     var points = ArrayList<Point>()
-    var max = 0.0
     var info = ""
-    fun Float.toPx(): Float = (this * Resources.getSystem().displayMetrics.density)
+    private var max = 0.0
+    private val paintArray = Array(8) { Paint() }
+    private fun Float.toPx(): Float = (this * Resources.getSystem().displayMetrics.density)
 
-    override fun draw(canvas: Canvas) {
-
-
-        super.draw(canvas)
-
-        val startY = 10f
-        val startX = 40f.toPx()
-        val stopY = height.toFloat() - 1
-        val stopX = width.toFloat() - 1
-        val middleY = height.toFloat() / 2
-        val step = (stopX - startX) / points.size
-
-        val paintArray = Array(8) { Paint() }
+    init {
         paintArray[0].setARGB(255, 255, 0, 0)
         paintArray[1].setARGB(255, 0, 255, 0)
         paintArray[2].setARGB(255, 0, 0, 255)
@@ -38,6 +27,18 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
         paintArray[6].setARGB(255, 0, 0, 0)
         paintArray[7].setARGB(255, 0, 0, 0)
         paintArray[7].textSize = 20f
+    }
+
+    override fun draw(canvas: Canvas) {
+        super.draw(canvas)
+
+        val startY = 10f
+        val startX = 40f.toPx()
+        val stopY = height.toFloat() - 1
+        val stopX = width.toFloat() - 1
+        val middleY = height.toFloat() / 2
+        val step = (stopX - startX) / points.size
+
         canvas.drawLine(startX, startY, startX, stopY, paintArray[6])
         if (info == "accelerometer" || info == "gyroscope" || info == "inclinations")
             canvas.drawLine(startX, middleY, stopX, middleY, paintArray[6])
@@ -45,25 +46,25 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
 
         when (info) {
             "windSpeed" -> {
-                windSpeedDraw(startX, middleY, stopY, step, canvas, paintArray)
+                windSpeedDraw(startX, middleY, stopY, step, canvas)
             }
             "tensometers" -> {
-                tensometersDraw(startX, middleY, stopY, step, canvas, paintArray)
+                tensometersDraw(startX, middleY, stopY, step, canvas)
             }
             "accelerometer" -> {
-                acceleratorDraw(startX, middleY, stopY, step, canvas, paintArray)
+                acceleratorDraw(startX, middleY, stopY, step, canvas)
             }
             "gyroscope" -> {
-                gyroscopeDraw(startX,middleY,stopY,step,canvas,paintArray)
+                gyroscopeDraw(startX,middleY,stopY,step,canvas)
             }
             "inclinations" -> {
-                inclinationsDraw(startX,middleY,stopY,step,canvas,paintArray)
+                inclinationsDraw(startX,middleY,stopY,step,canvas)
             }
             "windDirection" -> {
-                windDirectionDraw(startX,middleY,stopY,step,canvas,paintArray)
+                windDirectionDraw(startX,middleY,stopY,step,canvas)
             }
             "speed" -> {
-                speedDraw(startX,middleY,stopY,step,canvas,paintArray)
+                speedDraw(startX,middleY,stopY,step,canvas)
             }
             else -> println("nie dziala")
         }
@@ -89,7 +90,7 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
         return temp
     }
 
-    private fun windSpeedDraw(startX: Float, middleY: Float, stopY: Float, step: Float, canvas: Canvas, paintArray: Array<Paint>) {
+    private fun windSpeedDraw(startX: Float, middleY: Float, stopY: Float, step: Float, canvas: Canvas) {
         for (i in 0 until points.size) if (max < points[i].windSpeed) max = points[i].windSpeed
         max = calcMax(max)
         for (i in 0 until points.size - 1) {
@@ -104,7 +105,7 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
         canvas.drawText("0", 0f, stopY, paintArray[7])
     }
 
-    private fun tensometersDraw(startX: Float, middleY: Float, stopY: Float, step: Float, canvas: Canvas, paintArray: Array<Paint>) {
+    private fun tensometersDraw(startX: Float, middleY: Float, stopY: Float, step: Float, canvas: Canvas) {
         for (i in 0 until points.size) {
             for (j in 0 until points[i].tensometers.size) {
                 if (max < points[i].tensometers[j]) max = points[i].tensometers[j]
@@ -127,7 +128,7 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
         canvas.drawText("0", 0f, stopY, paintArray[7])
     }
 
-    private fun acceleratorDraw(startX: Float, middleY: Float, stopY: Float, step: Float, canvas: Canvas, paintArray: Array<Paint>) {
+    private fun acceleratorDraw(startX: Float, middleY: Float, stopY: Float, step: Float, canvas: Canvas) {
         for (i in 0 until points.size) {
             if (max < abs(points[i].accelerometer["x"]!!))
                 max = abs(points[i].accelerometer["x"]!!)
@@ -155,7 +156,7 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
         canvas.drawText("${0 - max}", 0f, stopY, paintArray[7])
     }
 
-    private fun gyroscopeDraw(startX: Float,middleY: Float,stopY: Float,step: Float,canvas: Canvas,paintArray: Array<Paint>){
+    private fun gyroscopeDraw(startX: Float,middleY: Float,stopY: Float,step: Float,canvas: Canvas){
         max = 90.0
         for (i in 0 until points.size - 1) {
             val x1 = startX + step * i
@@ -175,7 +176,7 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
         canvas.drawText("${0 - max}", 0f, stopY, paintArray[7])
     }
 
-    private fun inclinationsDraw(startX: Float,middleY: Float,stopY: Float,step: Float,canvas: Canvas,paintArray: Array<Paint>){
+    private fun inclinationsDraw(startX: Float,middleY: Float,stopY: Float,step: Float,canvas: Canvas){
         max = 90.0
         for (i in 0 until points.size - 1) {
             val x1 = startX + step * i
@@ -193,7 +194,7 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
         canvas.drawText("${0 - max}", 0f, stopY, paintArray[7])
     }
 
-    private fun windDirectionDraw(startX: Float,middleY: Float,stopY: Float,step: Float,canvas: Canvas,paintArray: Array<Paint>){
+    private fun windDirectionDraw(startX: Float,middleY: Float,stopY: Float,step: Float,canvas: Canvas){
         max = 360.0
         for (i in 0 until points.size - 1) {
             val x1 = startX + step * i
@@ -207,7 +208,7 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
         canvas.drawText("0", 0f, stopY, paintArray[7])
     }
 
-    private fun speedDraw(startX: Float,middleY: Float,stopY: Float,step: Float,canvas: Canvas,paintArray: Array<Paint>){
+    private fun speedDraw(startX: Float,middleY: Float,stopY: Float,step: Float,canvas: Canvas){
         for (i in 0 until points.size) if (max < points[i].speed) max = points[i].speed
         max = calcMax(max)
         for (i in 0 until points.size - 1) {

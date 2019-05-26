@@ -15,8 +15,7 @@ data class Datetime(val year:Int, val month:Int, val day:Int, val hour:Int, val 
             parcel.readInt(),
             parcel.readInt(),
             parcel.readInt(),
-            parcel.readInt()) {
-    }
+            parcel.readInt())
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(year)
@@ -33,7 +32,6 @@ data class Datetime(val year:Int, val month:Int, val day:Int, val hour:Int, val 
     }
 
     companion object CREATOR : Parcelable.Creator<Datetime> {
-        const val zeroDatetimeString = "0000-00-00T00:00:00:000Z"
         override fun createFromParcel(parcel: Parcel): Datetime {
             return Datetime(parcel)
         }

@@ -10,7 +10,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.util.Log
 import android.view.View
-import android.widget.TextView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -22,24 +21,20 @@ import kotlinx.android.synthetic.main.activity_detail.*
 
 class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
-    lateinit var points: ArrayList<Point>
-    lateinit var centerPoint: Point
-    lateinit var centerDataTime: Datetime
+    private lateinit var points: ArrayList<Point>
+    private lateinit var centerPoint: Point
+    private lateinit var centerDataTime: Datetime
+    var numberOfNeighborsDetail = MainActivity.numberOfNeighbors
 
-    var mainActivity = MainActivity()
+    private lateinit var mygestureDetector: GestureDetector
     var direction = ""
 
-    lateinit var mygestureDetector: GestureDetector
     lateinit var map: GoogleMap
     private lateinit var mapView: MapView
-
-
-    var numberOfNeighborsDetail = mainActivity.numberOfNeighbors
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
-
 
         /**
          * działa tak, że ZAWSZE PRZESYŁA 301 PUNKTÓW i działa
@@ -63,7 +58,7 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
         gyroscope.info = "gyroscope"
 
         //jeśli wszystkich danych jest mniej niż wskazano w MainActivity (300) to wyświetlamy je wszystkie i blokujemy przewijanie w bok
-        numberOfNeighborsDetail = if (points.size >= mainActivity.numberOfNeighbors) mainActivity.numberOfNeighbors else points.size
+        numberOfNeighborsDetail = if (points.size >= MainActivity.numberOfNeighbors) MainActivity.numberOfNeighbors else points.size
 
         centerPoint = points[numberOfNeighborsDetail / 2]
         centerDataTime = centerPoint.datetime!!
@@ -74,12 +69,12 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
         mapView.getMapAsync(this)
 
         //wyswietlanie godziny
-        tTime.text = "${points.first().datetime?.hour}:${points.first().datetime?.minute}:${points.first().datetime?.second}" +
-                " - ${points.last().datetime?.hour}:${points.last().datetime?.minute}:${points.last().datetime?.second}"
+        tTime.text = getString(R.string.interval,points.first().datetime?.hour,points.first().datetime?.minute, points.first().datetime?.second,
+                points.last().datetime?.hour,points.last().datetime?.minute, points.last().datetime?.second)
 
         mygestureDetector = GestureDetector(this@DetailActivity, MyGestureDetector())
 
-        val touchListener = View.OnTouchListener { v, event ->
+        val touchListener = View.OnTouchListener { _, event ->
             mygestureDetector.onTouchEvent(event)
         }
         scrollView2.setOnTouchListener(touchListener)
@@ -129,18 +124,15 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
      */
     inner class MyGestureDetector : GestureDetector.SimpleOnGestureListener() {
 
-        private val SWIPE_THRESHOLD = 400
-        private val SWIPE_VELOCITY_THRESHOLD = 400
-
+        private val SWIPE_THRESHOLD = 200
+        private val SWIPE_VELOCITY_THRESHOLD = 200
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
 
             if (e1 != null && e2 != null) {
                 val diffY = e2.y - e1.y
                 val diffX = e2.x - e1.x
-
-
-                if (Math.abs(diffX) > Math.abs(diffY) && numberOfNeighborsDetail >= mainActivity.numberOfNeighbors) {
+                if (Math.abs(diffX) > Math.abs(diffY) && numberOfNeighborsDetail >= MainActivity.numberOfNeighbors) {
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {     //sprawdza czy ruch był w lewo czy w prawo
                             onSwipeLeft()
@@ -148,19 +140,17 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
                         else {
                             onSwipeRight()
                         }
-                        wsText.text = "points size = ${points.size}"
-
                         //wysłanie danych do MainActivity
                         Log.d("sender", "BROADCASTING message")
                         val intent = Intent("center_intent").putExtra("center", centerDataTime).putExtra("direction", direction)
                         LocalBroadcastManager.getInstance(this@DetailActivity).sendBroadcast(intent)
                         finish()
                     }
-                } else {
+                }
+                else {
                     Log.d("scroll", "SCROLL")
                 }
             }
-
             return super.onFling(e1, e2, velocityX, velocityY)
         }
 
@@ -174,10 +164,5 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
             direction = "left"
             Log.e("ViewSwipe", "LEFT")
         }
-
-
     }
-
-
-
 }
