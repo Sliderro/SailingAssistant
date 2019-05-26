@@ -29,7 +29,6 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0, val sp
     }
 
     constructor(parcel: Parcel) : this(
-            //parcel.readParcelable(Datetime::class.java.classLoader),
             parcel.readDouble(),
             parcel.readDouble(),
             parcel.readDouble(),

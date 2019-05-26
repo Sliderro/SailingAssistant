@@ -2,7 +2,6 @@ package com.example.maciej.sailingassistant
 
 import android.util.Log
 import com.google.firebase.database.*
-//import sun.awt.windows.ThemeReader.getPosition
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.ValueEventListener
@@ -31,7 +30,6 @@ object FirebaseDatabaseManager {
             override fun onCancelled(p0: DatabaseError) {
                 Log.d("myDB", p0.message)
             }
-
             override fun onDataChange(p0: DataSnapshot) {
                 points.clear()
                 var currentPoint: Point?

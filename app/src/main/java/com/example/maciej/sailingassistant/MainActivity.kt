@@ -6,19 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
-import android.os.AsyncTask
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -32,8 +29,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     private lateinit var mapView: MapView
     private val firebaseDatabaseManager = FirebaseDatabaseManager
     var pointList = firebaseDatabaseManager.points
-    var dayToLoad = "2019-05-19"
-    var numberOfNeighbors = 300
+    private var dayToLoad = "2019-05-19"
+
+    companion object {
+        var numberOfNeighbors = 300
+    }
+
 
 
     private val firebaseCallback = object : FirebaseCallback {
@@ -94,12 +95,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
                 for (i in 0..(pointList.size - 2)) {
                     p.add(LatLng(pointList[i]!!.latitude, pointList[i]!!.longitude), LatLng(pointList[i + 1]!!.latitude, pointList[i + 1]!!.longitude))
                 }
-                runOnUiThread(object : Runnable {
-                    override fun run() {
-                        map.clear()
-                        map.addPolyline(p)
-                    }
-                })
+                runOnUiThread {
+                    map.clear()
+                    map.addPolyline(p)
+                }
             }
         }.start()
     }
@@ -108,7 +107,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
      * Zwraca pozycję na liście punktu najbliższego danym koordynatom
      * Zwraca null gdy lista punktów jest pusta
      */
-    fun findClosestPointIndex(targetLatitude: Double, targetLongitude: Double): Int? {
+    private fun findClosestPointIndex(targetLatitude: Double, targetLongitude: Double): Int? {
         if (pointList.isEmpty()) {
             return null
         }
@@ -203,7 +202,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     /**
      * Uruchamia aktywność z podglądem szczegółów i przekuzje jej listę punktów
      */
-    fun launchDetailActivity(points: ArrayList<Point>) {
+    private fun launchDetailActivity(points: ArrayList<Point>) {
         val detailIntent = Intent(this, DetailActivity::class.java)
         detailIntent.putParcelableArrayListExtra("points", points)
         startActivity(detailIntent)
@@ -251,12 +250,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
                     for (j in newCenterPointIndex - numberOfNeighbors / 2..newCenterPointIndex + numberOfNeighbors / 2) {
                         neighbourPoints.add(pointList[j]!!)
                     }
-                } else if (newCenterPointIndex - numberOfNeighbors / 2 < 0) {   //jeśli wybrano początkowy odcinek czasu
+                }
+                else if (newCenterPointIndex - numberOfNeighbors / 2 < 0) {   //jeśli wybrano początkowy odcinek czasu
                     for (j in 0..numberOfNeighbors) {
                         neighbourPoints.add(pointList[j]!!)     //dodaje pierwsze 300 punktów
                     }
-                } else if (newCenterPointIndex + numberOfNeighbors / 2 > pointList.size) {  //jeśli wybrano ostatni odcinek czasu
-                    for (j in pointList.size - numberOfNeighbors - 1..pointList.size - 1) {     //dodaje ostatnie 300 punktów
+                }
+                else if (newCenterPointIndex + numberOfNeighbors / 2 > pointList.size) {  //jeśli wybrano ostatni odcinek czasu
+                    for (j in pointList.size - numberOfNeighbors - 1..pointList.lastIndex) {     //dodaje ostatnie 300 punktów
                         neighbourPoints.add(pointList[j]!!)
                     }
                 }
@@ -277,6 +278,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
             val receivedDirection = intent.getStringExtra("direction")
             Log.d("receiver1", "GOT MESSAGE 1: $receivedCenterPoint")
             Log.d("receiver2", "GOT MESSAGE 2: $receivedDirection")
+            Thread.sleep(10)
             findNewNeighbours(receivedCenterPoint, receivedDirection)
         }
     }
