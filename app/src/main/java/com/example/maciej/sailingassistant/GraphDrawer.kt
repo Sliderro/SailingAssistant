@@ -80,8 +80,8 @@ class GraphDrawer(context: Context, attributeSet: AttributeSet?)
             counter++
         }
         temp = when {
-            temp > 2.0 -> 5.0
             temp > 5.0 -> 10.0
+            temp > 2.0 -> 5.0
             else -> 2.0
         }
         for (i in 0 until counter) {
