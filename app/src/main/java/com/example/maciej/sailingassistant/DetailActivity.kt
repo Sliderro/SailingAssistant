@@ -69,8 +69,8 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
         mapView.getMapAsync(this)
 
         //wyswietlanie godziny
-        tTime.text = getString(R.string.interval,points.first().datetime?.hour,points.first().datetime?.minute, points.first().datetime?.second,
-                points.last().datetime?.hour,points.last().datetime?.minute, points.last().datetime?.second)
+        tTime.text = getString(R.string.interval, points.first().datetime?.hour, points.first().datetime?.minute, points.first().datetime?.second,
+                points.last().datetime?.hour, points.last().datetime?.minute, points.last().datetime?.second)
 
         mygestureDetector = GestureDetector(this@DetailActivity, MyGestureDetector())
 
@@ -103,16 +103,16 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
         val startLongitude = points[numberOfNeighborsDetail / 2].longitude
         val startPosition = LatLng(startLatitude, startLongitude)
         map.moveCamera(CameraUpdateFactory.newLatLng(startPosition))
-        object: Thread() {
+        object : Thread() {
             override fun run() {
                 super.run()
                 val p = PolylineOptions().width(5.0f).color(Color.BLUE)
-                for( i in 0..(points.size-2) ) {
-                    p.add( LatLng( points[i].latitude, points[i].longitude ), LatLng( points[i+1].latitude, points[i+1].longitude ) )
+                for (i in 0..(points.size - 2)) {
+                    p.add(LatLng(points[i].latitude, points[i].longitude), LatLng(points[i + 1].latitude, points[i + 1].longitude))
                 }
                 runOnUiThread {
                     map.clear()
-                    map.addPolyline( p )
+                    map.addPolyline(p)
                 }
             }
         }.start()
@@ -136,8 +136,7 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {     //sprawdza czy ruch był w lewo czy w prawo
                             onSwipeLeft()
-                        }
-                        else {
+                        } else {
                             onSwipeRight()
                         }
                         //wysłanie danych do MainActivity
@@ -146,8 +145,7 @@ class DetailActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapC
                         LocalBroadcastManager.getInstance(this@DetailActivity).sendBroadcast(intent)
                         finish()
                     }
-                }
-                else {
+                } else {
                     Log.d("scroll", "SCROLL")
                 }
             }

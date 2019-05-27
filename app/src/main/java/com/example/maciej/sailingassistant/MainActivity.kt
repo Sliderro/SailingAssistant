@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
     }
 
 
-
     private val firebaseCallback = object : FirebaseCallback {
         override fun onPointsFetched() {
             drawPathDetailed()
@@ -250,13 +249,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapCli
                     for (j in newCenterPointIndex - numberOfNeighbors / 2..newCenterPointIndex + numberOfNeighbors / 2) {
                         neighbourPoints.add(pointList[j]!!)
                     }
-                }
-                else if (newCenterPointIndex - numberOfNeighbors / 2 < 0) {   //jeśli wybrano początkowy odcinek czasu
+                } else if (newCenterPointIndex - numberOfNeighbors / 2 < 0) {   //jeśli wybrano początkowy odcinek czasu
                     for (j in 0..numberOfNeighbors) {
                         neighbourPoints.add(pointList[j]!!)     //dodaje pierwsze 300 punktów
                     }
-                }
-                else if (newCenterPointIndex + numberOfNeighbors / 2 > pointList.size) {  //jeśli wybrano ostatni odcinek czasu
+                } else if (newCenterPointIndex + numberOfNeighbors / 2 > pointList.size) {  //jeśli wybrano ostatni odcinek czasu
                     for (j in pointList.size - numberOfNeighbors - 1..pointList.lastIndex) {     //dodaje ostatnie 300 punktów
                         neighbourPoints.add(pointList[j]!!)
                     }

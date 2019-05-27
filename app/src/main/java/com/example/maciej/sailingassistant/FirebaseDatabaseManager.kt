@@ -2,9 +2,6 @@ package com.example.maciej.sailingassistant
 
 import android.util.Log
 import com.google.firebase.database.*
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.ValueEventListener
 
 
 /**
@@ -23,13 +20,14 @@ object FirebaseDatabaseManager {
      * pobiera punkty z danego dnia zadanego stringiem w postaci: yyyy-mm-dd
      */
     fun fetchPoints(dateString: String, firebaseCallback: FirebaseCallback) {
-        val fetchDate = if(dateString =="") "a" else dateString
+        val fetchDate = if (dateString == "") "a" else dateString
 
         val query = db.child("logs").child("twR0OqZbv3b875Y8NSnjR39leZi2").child(fetchDate)
         query.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 Log.d("myDB", p0.message)
             }
+
             override fun onDataChange(p0: DataSnapshot) {
                 points.clear()
                 var currentPoint: Point?
