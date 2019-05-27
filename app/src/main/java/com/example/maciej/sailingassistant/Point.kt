@@ -15,17 +15,17 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0, val sp
     var tensometers: List<Double> = ArrayList(6)
     var inclinations: List<Double> = ArrayList(2)
     var accelerometer: Map<String, Double> = HashMap()
-    var gyroscope: Map<String,Double> = HashMap()
+    var gyroscope: Map<String, Double> = HashMap()
 
 
     constructor(datetime: Datetime, longitude: Double, latitude: Double, windDirection: Double, windSpeed: Double,
-                tensometers: ArrayList<Double>, inclinations: ArrayList<Double>, accelerometer: Map<String, Double>, gyroscope: Map<String,Double>) : this(longitude, latitude, windDirection, windSpeed) {
+                tensometers: ArrayList<Double>, inclinations: ArrayList<Double>, accelerometer: Map<String, Double>, gyroscope: Map<String, Double>) : this(longitude, latitude, windDirection, windSpeed) {
 
         this.datetime = datetime
-        this.tensometers=tensometers
-        this.inclinations=inclinations
-        this.accelerometer=accelerometer
-        this.gyroscope=gyroscope
+        this.tensometers = tensometers
+        this.inclinations = inclinations
+        this.accelerometer = accelerometer
+        this.gyroscope = gyroscope
     }
 
     constructor(parcel: Parcel) : this(
@@ -70,27 +70,27 @@ data class Point(var longitude: Double = 0.0, var latitude: Double = 0.0, val sp
     }
 
     fun getField(fieldName: String): Double? {
-        return when(fieldName) {
-            "longtitude" ->  longitude
-            "latitude" ->  latitude
+        return when (fieldName) {
+            "longtitude" -> longitude
+            "latitude" -> latitude
             "speed" -> speed
-            "windDirection" ->  windDirection
-            "windSpeed" ->  windSpeed
-            "tensometers0" ->  tensometers[0]
-            "tensometers1" ->  tensometers[1]
-            "tensometers2" ->  tensometers[2]
-            "tensometers3" ->  tensometers[3]
-            "tensometers4" ->  tensometers[4]
-            "tensometers5" ->  tensometers[5]
-            "inclinations0" ->  inclinations[0]
-            "inclinations1" ->  inclinations[1]
-            "accelerometerX" ->  accelerometer["x"]
-            "accelerometerY" ->  accelerometer["y"]
-            "accelerometerZ" ->  accelerometer["z"]
-            "gyroscopeX" ->  gyroscope["x"]
-            "gyroscopeY" ->  gyroscope["y"]
-            "gyroscopeZ" ->  gyroscope["z"]
-            else ->  null
+            "windDirection" -> windDirection
+            "windSpeed" -> windSpeed
+            "tensometers0" -> tensometers[0]
+            "tensometers1" -> tensometers[1]
+            "tensometers2" -> tensometers[2]
+            "tensometers3" -> tensometers[3]
+            "tensometers4" -> tensometers[4]
+            "tensometers5" -> tensometers[5]
+            "inclinations0" -> inclinations[0]
+            "inclinations1" -> inclinations[1]
+            "accelerometerX" -> accelerometer["x"]
+            "accelerometerY" -> accelerometer["y"]
+            "accelerometerZ" -> accelerometer["z"]
+            "gyroscopeX" -> gyroscope["x"]
+            "gyroscopeY" -> gyroscope["y"]
+            "gyroscopeZ" -> gyroscope["z"]
+            else -> null
         }
     }
 
